@@ -24,7 +24,6 @@ public class SafeCalculator{
                 System.out.println("Error: Please enter valid integers only.");
             }
         }
-        scanner.close();
     }
 
 }
