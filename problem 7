@@ -1,0 +1,119 @@
+InvalidSalaryException.java
+public class InvalidSalaryException extends Exception {
+    public InvalidSalaryException(String message) {
+        super(message);
+    }
+}
+Employee.java
+public abstract class Employee {
+    protected String name;
+    protected String id;
+
+    public Employee(String name, String id) {
+        this.name = name;
+        this.id = id;
+    }
+
+    public abstract double calculateMonthlySalary() throws InvalidSalaryException;
+
+    public double printPaySlip() {
+        double salary = 0;
+
+        try {
+            salary = calculateMonthlySalary();
+            System.out.printf("Name: %s | ID: %s | Monthly Salary: %.2f%n", name, id, salary);
+        } catch (InvalidSalaryException e) {
+            System.out.printf("Name: %s | ID: %s | Error: %s%n", name, id, e.getMessage());
+        }
+
+        return salary;
+    }
+}
+FullTimeEmployee.java
+public class FullTimeEmployee extends Employee {
+    private double annualSalary;
+
+    public FullTimeEmployee(String name, String id, double annualSalary) {
+        super(name, id);
+        this.annualSalary = annualSalary;
+    }
+
+    public double calculateMonthlySalary() throws InvalidSalaryException {
+        if (annualSalary <= 0) {
+            throw new InvalidSalaryException("Invalid annual salary");
+        }
+        return annualSalary / 12;
+    }
+}
+PartTimeEmployee.java
+public class PartTimeEmployee extends Employee {
+    private double hourlyRate;
+    private int hoursWorked;
+
+    public PartTimeEmployee(String name, String id, double hourlyRate, int hoursWorked) {
+        super(name, id);
+        this.hourlyRate = hourlyRate;
+        this.hoursWorked = hoursWorked;
+    }
+
+    public double calculateMonthlySalary() throws InvalidSalaryException {
+        if (hourlyRate < 0 || hoursWorked < 0) {
+            throw new InvalidSalaryException("Invalid hourly rate or hours worked");
+        }
+        return hourlyRate * hoursWorked;
+    }
+}
+CommissionEmployee.java
+public class CommissionEmployee extends Employee {
+    private double baseSalary;
+    private double salesAmount;
+    private double commissionRate;
+
+    public CommissionEmployee(String name, String id, double baseSalary, double salesAmount, double commissionRate) {
+        super(name, id);
+        this.baseSalary = baseSalary;
+        this.salesAmount = salesAmount;
+        this.commissionRate = commissionRate;
+    }
+
+    public double calculateMonthlySalary() throws InvalidSalaryException {
+        if (commissionRate < 0 || commissionRate > 1) {
+            throw new InvalidSalaryException("Invalid commission rate");
+        }
+        return baseSalary + (salesAmount * commissionRate);
+    }
+}
+PayrollSystem.java
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class PayrollSystem {
+
+    public static void main(String[] args) {
+
+        Employee[] employees = {
+                new FullTimeEmployee("Ali", "F001", 60000),
+                new PartTimeEmployee("Sara", "P001", 20, 80),
+                new CommissionEmployee("John", "C001", 1000, 5000, 0.1),
+                new FullTimeEmployee("Bob", "F002", -5000),
+                new CommissionEmployee("Emma", "C002", 800, 3000, 1.2)
+        };
+
+        double totalPayroll = 0;
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter("payroll_report.txt"))) {
+
+            for (Employee e : employees) {
+                double salary = e.printPaySlip();
+                totalPayroll += salary;
+            }
+
+            writer.printf("Total Monthly Payroll: %.2f%n", totalPayroll);
+            System.out.printf("%nTotal Monthly Payroll: %.2f%n", totalPayroll);
+
+        } catch (IOException e) {
+            System.out.println("Error writing payroll report.");
+        }
+    }
+}
