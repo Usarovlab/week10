@@ -1,0 +1,85 @@
+//Printable.java
+public interface Printable {
+    void print();
+}
+//Taxable.java
+public interface Taxable {
+    double TAX_RATE = 0.12;
+    double calculateTax();
+}
+//Product.java
+public class Product implements Printable {
+    protected String name;
+    protected double price;
+
+    public Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public void print() {
+        System.out.printf("Product: %s | Price: %.2f%n", name, price);
+    }
+}
+//TaxableProduct.java
+public class TaxableProduct extends Product implements Taxable {
+
+    public TaxableProduct(String name, double price) {
+        super(name, price);
+    }
+
+    public double calculateTax() {
+        return price * TAX_RATE;
+    }
+
+    public void print() {
+        double tax = calculateTax();
+        double total = price + tax;
+
+        System.out.printf("Product: %s | Price: %.2f | Tax: %.2f | Total: %.2f%n",
+                name, price, tax, total);
+    }
+}
+//DigitalProduct.java
+public class DigitalProduct extends TaxableProduct {
+    private String downloadUrl;
+
+    public DigitalProduct(String name, double price, String downloadUrl) {
+        super(name, price);
+        this.downloadUrl = downloadUrl;
+    }
+
+    public void print() {
+        double tax = calculateTax();
+        double total = price + tax;
+
+        System.out.printf("Digital Product: %s | Price: %.2f | Tax: %.2f | Total: %.2f | URL: %s%n",
+                name, price, tax, total, downloadUrl);
+    }
+}
+//StoreDemo.java
+public class StoreDemo {
+
+    public static void main(String[] args) {
+
+        Printable[] items = {
+                new Product("Notebook", 5.00),
+                new TaxableProduct("Headphones", 50.00),
+                new DigitalProduct("E-Book", 10.00, "http://download.com/ebook"),
+                new Product("Pen", 2.00),
+                new TaxableProduct("Keyboard", 30.00)
+        };
+
+        double totalTax = 0;
+
+        for (Printable item : items) {
+            item.print();
+
+            if (item instanceof Taxable) {
+                totalTax += ((Taxable) item).calculateTax();
+            }
+        }
+
+        System.out.printf("%nTotal Tax Collected: %.2f%n", totalTax);
+    }
+}
